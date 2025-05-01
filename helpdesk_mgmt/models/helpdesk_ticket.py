@@ -1,4 +1,4 @@
-from odoo import _, api, fields, models, tools
+from odoo import api, fields, models, tools
 from odoo.exceptions import AccessError
 
 
@@ -16,21 +16,27 @@ class HelpdeskTicket(models.Model):
         for ticket in self:
             ticket.stage_id = ticket.team_id._get_applicable_stages()[:1]
 
+    @api.depends("team_id")
+    def _compute_user_id(self):
+        for ticket in self:
+            if not ticket.user_id and ticket.team_id:
+                ticket.user_id = ticket.team_id.alias_user_id
+
     @api.model
-    def _read_group_stage_ids(self, stages, domain, order):
+    def _read_group_stage_ids(self, stages, domain):
         """Show always the stages without team, or stages of the default team."""
         search_domain = [
             "|",
             ("id", "in", stages.ids),
             ("team_ids", "=", False),
         ]
-        default_team_id = self.default_get(["team_id"]).get("team_id")
+        default_team_id = self.default_get(["team_id"])
         if default_team_id:
             search_domain = [
                 "|",
-                ("team_ids", "=", default_team_id),
+                ("team_ids", "=", default_team_id["team_id"]),
             ] + search_domain
-        return stages.search(search_domain, order=order)
+        return stages.search(search_domain)
 
     number = fields.Char(string="Ticket number", default="/", readonly=True)
     name = fields.Char(string="Title", required=True)
@@ -40,7 +46,7 @@ class HelpdeskTicket(models.Model):
         string="Assigned user",
         tracking=True,
         index=True,
-        domain="team_id and [('share', '=', False),('id', 'in', user_ids)] or [('share', '=', False)]",  # noqa: B950
+        domain="team_id and [('share', '=', False),('id', 'in', user_ids)] or [('share', '=', False)]",  # noqa: B950,E501
     )
     user_ids = fields.Many2many(
         comodel_name="res.users", related="team_id.user_ids", string="Users"
@@ -59,6 +65,11 @@ class HelpdeskTicket(models.Model):
         domain="['|',('team_ids', '=', team_id),('team_ids','=',False)]",
     )
     partner_id = fields.Many2one(comodel_name="res.partner", string="Contact")
+    commercial_partner_id = fields.Many2one(
+        string="Commercial Partner",
+        store=True,
+        related="partner_id.commercial_partner_id",
+    )
     partner_name = fields.Char()
     partner_email = fields.Char(string="Email")
     last_stage_update = fields.Datetime(default=fields.Datetime.now)
@@ -146,6 +157,21 @@ class HelpdeskTicket(models.Model):
                 vals["number"] = self._prepare_ticket_number(vals)
             if vals.get("user_id") and not vals.get("assigned_date"):
                 vals["assigned_date"] = fields.Datetime.now()
+            if vals.get("team_id"):
+                team = self.env["helpdesk.ticket.team"].browse([vals["team_id"]])
+                if team.company_id:
+                    vals["company_id"] = team.company_id.id
+            # Automatically set default e-mail channel when created from the
+            # fetchmail cron task
+            if self.env.context.get("fetchmail_cron_running") and not vals.get(
+                "channel_id"
+            ):
+                channel_email_id = self.env.ref(
+                    "helpdesk_mgmt.helpdesk_ticket_channel_email",
+                    raise_if_not_found=False,
+                )
+                if channel_email_id:
+                    vals["channel_id"] = channel_email_id.id
         return super().create(vals_list)
 
     def copy(self, default=None):
@@ -182,7 +208,7 @@ class HelpdeskTicket(models.Model):
     def _compute_access_url(self):
         res = super()._compute_access_url()
         for item in self:
-            item.access_url = "/my/ticket/%s" % (item.id)
+            item.access_url = f"/my/ticket/{item.id}"
         return res
 
     # ---------------------------------------------------
@@ -215,7 +241,7 @@ class HelpdeskTicket(models.Model):
         if custom_values is None:
             custom_values = {}
         defaults = {
-            "name": msg.get("subject") or _("No Subject"),
+            "name": msg.get("subject") or self.env._("No Subject"),
             "description": msg.get("body"),
             "partner_email": msg.get("from"),
             "partner_id": msg.get("author_id"),
@@ -261,13 +287,15 @@ class HelpdeskTicket(models.Model):
             for ticket in self:
                 if ticket.partner_id:
                     ticket._message_add_suggested_recipient(
-                        recipients, partner=ticket.partner_id, reason=_("Customer")
+                        recipients,
+                        partner=ticket.partner_id,
+                        reason=self.env._("Customer"),
                     )
                 elif ticket.partner_email:
                     ticket._message_add_suggested_recipient(
                         recipients,
                         email=ticket.partner_email,
-                        reason=_("Customer Email"),
+                        reason=self.env._("Customer Email"),
                     )
         except AccessError:
             # no read access rights -> just ignore suggested recipients because this

@@ -17,6 +17,7 @@
   - Pedro M. Baeza
   - Víctor Martínez
   - Carolina Fernandez
+  - Carlos Roca
 - [ID42 Sistemas](https://www.id42.com.br):
   - Marcel Savegnago
   - Eduardo Aparício
@@ -26,3 +27,5 @@
   - David Alonso
 - [XCG Consulting](https://xcg-consulting.fr):
   - Houzéfa Abbasbhay
+- [Kencove](https://kencove.com):
+  - Mohamed Alkobrosli

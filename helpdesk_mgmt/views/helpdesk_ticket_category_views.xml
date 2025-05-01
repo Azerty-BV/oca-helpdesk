@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <record id="helpdesk_ticket_category_view_search" model="ir.ui.view">
+    <record id="view_helpdesk_ticket_category_search" model="ir.ui.view">
         <field name="name">helpdesk.ticket.category.search</field>
         <field name="model">helpdesk.ticket.category</field>
         <field name="arch" type="xml">
@@ -24,13 +24,12 @@
             </search>
         </field>
     </record>
-    <record id="helpdesk_ticket_category_view_form" model="ir.ui.view">
+    <record id="view_helpdesk_category_form" model="ir.ui.view">
         <field name="name">view.helpdesk_category.form</field>
         <field name="model">helpdesk.ticket.category</field>
         <field name="arch" type="xml">
             <form string="Stages">
-                <header>
-                </header>
+                <header />
                 <sheet>
                     <widget
                         name="web_ribbon"
@@ -53,11 +52,11 @@
             </form>
         </field>
     </record>
-    <record id="helpdesk_ticket_category_view_tree" model="ir.ui.view">
-        <field name="name">view.helpdesk_category.tree</field>
+    <record id="view_helpdesk_category_tree" model="ir.ui.view">
+        <field name="name">view.helpdesk_category.list</field>
         <field name="model">helpdesk.ticket.category</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
+            <list editable="bottom">
                 <field name="sequence" widget="handle" />
                 <field name="name" />
                 <field
@@ -65,7 +64,7 @@
                     optional="hide"
                     groups="base.group_multi_company"
                 />
-            </tree>
+            </list>
         </field>
     </record>
 </odoo>

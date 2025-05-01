@@ -1,19 +1,19 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <odoo>
     <!-- Actions -->
-    <record id="helpdesk_ticket_team_action_dashboard" model="ir.actions.act_window">
+    <record id="helpdesk_ticket_dashboard_action" model="ir.actions.act_window">
         <field name="name">Dashboard</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">helpdesk.ticket.team</field>
-        <field name="view_mode">kanban,tree,form,pivot</field>
+        <field name="view_mode">kanban,list,form,pivot</field>
     </record>
     <record id="helpdesk_ticket_action" model="ir.actions.act_window">
         <field name="name">Tickets</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">helpdesk.ticket</field>
-        <field name="view_mode">tree,kanban,form,pivot</field>
+        <field name="view_mode">list,kanban,form,pivot</field>
     </record>
-    <record id="helpdesk_ticket_action_reporting" model="ir.actions.act_window">
+    <record id="helpdesk_ticket_reporting_action" model="ir.actions.act_window">
         <field name="name">Reporting</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">helpdesk.ticket</field>
@@ -23,31 +23,31 @@
         <field name="name">Channels</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">helpdesk.ticket.channel</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
     <record id="helpdesk_ticket_category_action" model="ir.actions.act_window">
         <field name="name">Categories</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">helpdesk.ticket.category</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
     <record id="helpdesk_ticket_team_action" model="ir.actions.act_window">
         <field name="name">Teams</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">helpdesk.ticket.team</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
     <record id="helpdesk_ticket_stage_action" model="ir.actions.act_window">
         <field name="name">Stages</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">helpdesk.ticket.stage</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
     <record id="helpdesk_ticket_tag_action" model="ir.actions.act_window">
         <field name="name">Ticket Tags</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">helpdesk.ticket.tag</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
     <!-- Menus -->
     <menuitem
@@ -61,7 +61,7 @@
         id="helpdesk_ticket_dashboard_menu"
         name="Dashboard"
         parent="helpdesk_ticket_main_menu"
-        action="helpdesk_ticket_team_action_dashboard"
+        action="helpdesk_ticket_dashboard_action"
         sequence="1"
     />
     <menuitem
@@ -82,7 +82,7 @@
         id="helpdesk_ticket_reporting_analysis"
         name="Tickets"
         parent="helpdesk_ticket_reporting_menu"
-        action="helpdesk_ticket_action_reporting"
+        action="helpdesk_ticket_reporting_action"
         sequence="5"
     />
     <menuitem
@@ -96,7 +96,7 @@
         id="helpdesk_config_settings_menu"
         name="Settings"
         parent="helpdesk_ticket_config_main_menu"
-        action="res_config_settings_action_helpdesk_mgmt"
+        action="action_helpdesk_mgmt_config_settings"
         sequence="1"
     />
     <menuitem
