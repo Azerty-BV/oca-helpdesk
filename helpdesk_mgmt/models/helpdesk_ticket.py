@@ -293,35 +293,40 @@ class HelpdeskTicket(models.Model):
         self.message_subscribe(partner_ids)
         return super().message_update(msg, update_vals=update_vals)
 
-    def _message_get_suggested_recipients(self):
-        recipients = super()._message_get_suggested_recipients()
-        try:
-            for ticket in self:
-                if ticket.partner_id:
-                    ticket._message_add_suggested_recipient(
-                        recipients,
-                        partner=ticket.partner_id,
-                        reason=self.env._("Customer"),
-                    )
-                elif ticket.partner_email:
-                    ticket._message_add_suggested_recipient(
-                        recipients,
-                        email=ticket.partner_email,
-                        reason=self.env._("Customer Email"),
-                    )
-        except AccessError:
-            # no read access rights -> just ignore suggested recipients because this
-            # imply modifying followers
-            return recipients
-        return recipients
+    # FIXME def _message_get_suggested_recipients(self, reply_discussion=False, reply_message=None,
+    #                                         no_create=True, primary_email=False, additional_partners=None):
+    #     self.ensure_one()
+    #     recipients = self._message_get_suggested_recipients_batch(
+    #         reply_discussion=reply_discussion, reply_message=reply_message,
+    #         no_create=no_create, primary_email=primary_email, additional_partners=additional_partners,
+    #     )[self.id]
+    #     try:
+    #         for ticket in self:
+    #             if ticket.partner_id:
+    #                 ticket._message_add_suggested_recipient(
+    #                     recipients,
+    #                     partner=ticket.partner_id,
+    #                     reason=self.env._("Customer"),
+    #                 )
+    #             elif ticket.partner_email:
+    #                 ticket._message_add_suggested_recipient(
+    #                     recipients,
+    #                     email=ticket.partner_email,
+    #                     reason=self.env._("Customer Email"),
+    #                 )
+    #     except AccessError:
+    #         # no read access rights -> just ignore suggested recipients because this
+    #         # imply modifying followers
+    #         return recipients
+    #     return recipients
 
-    def _notify_get_reply_to(self, default=None):
+    def _notify_get_reply_to(self, default=None, author_id=None):
         """Override to set alias of tasks to their team if any."""
-        aliases = self.sudo().mapped("team_id")._notify_get_reply_to(default=default)
+        aliases = self.sudo().mapped("team_id")._notify_get_reply_to(default, author_id)
         res = {ticket.id: aliases.get(ticket.team_id.id) for ticket in self}
         leftover = self.filtered(lambda rec: not rec.team_id)
         if leftover:
             res.update(
-                super(HelpdeskTicket, leftover)._notify_get_reply_to(default=default)
+                super(HelpdeskTicket, leftover)._notify_get_reply_to(default, author_id)
             )
         return res
